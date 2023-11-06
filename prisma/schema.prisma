@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model client {
+  id        Int     @id(map: "PK_client") @default(autoincrement())
+  name      String? @db.VarChar(45)
+  idade     String? @db.VarChar(45)
+  phone     String? @db.VarChar(45)
+  cpf       String? @db.VarChar(45)
+  type_user String? @db.Char(1)
+  genero_id Int
+  login_id  Int
+  genero    genero  @relation(fields: [genero_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Client_genero1")
+  login     login   @relation(fields: [login_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Client_login1")
+
+  @@index([genero_id], map: "fk_Client_genero1_idx")
+  @@index([login_id], map: "fk_Client_login1_idx")
+}
+
+model genero {
+  id         Int          @id(map: "PK_genero") @default(autoincrement())
+  name       String?      @db.VarChar(45)
+  client     client[]
+  sex_worker sex_worker[]
+}
+
+model login {
+  id         Int       @id(map: "PK_login") @default(autoincrement())
+  name       String?   @db.VarChar(45)
+  logincol   String?   @db.VarChar(45)
+  email      String?   @db.VarChar(45)
+  passwd     String?   @db.VarChar(45)
+  photo      String?   @db.VarChar(500)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  client     client[]
+}
+
+model sex_worker {
+  id                 Int                  @id(map: "PK_sex_worker") @default(autoincrement())
+  name               String?              @db.VarChar(45)
+  idade              String?              @db.VarChar(45)
+  genero_id          Int
+  genero             genero               @relation(fields: [genero_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_genero")
+  sex_worker_address sex_worker_address[]
+  sex_worker_contact sex_worker_contact[]
+  sex_worker_galery  sex_worker_galery[]
+  sex_worker_service sex_worker_service[]
+
+  @@index([genero_id], map: "fk_sex_worker_genero_idx")
+}
+
+model sex_worker_address {
+  id                                        Int                                         @id(map: "PK_sex_worker_address") @default(autoincrement())
+  address_name                              String?                                     @db.VarChar(45)
+  address_number                            String?                                     @db.VarChar(45)
+  address_city                              String?                                     @db.VarChar(45)
+  address_state                             String?                                     @db.VarChar(45)
+  address_padrao                            String?                                     @db.Char(1)
+  sex_worker_id                             Int
+  sex_worker                                sex_worker                                  @relation(fields: [sex_worker_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_address_sex_worker1")
+  sex_worker_address_has_sex_worker_service sex_worker_address_has_sex_worker_service[]
+
+  @@index([sex_worker_id], map: "fk_sex_worker_address_sex_worker1_idx")
+}
+
+model sex_worker_address_has_sex_worker_service {
+  sex_worker_address_id Int
+  sex_worker_service_id Int
+  sex_worker_address    sex_worker_address @relation(fields: [sex_worker_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_address_has_sex_worker_service_sex_worker_addre1")
+  sex_worker_service    sex_worker_service @relation(fields: [sex_worker_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_address_has_sex_worker_service_sex_worker_servi1")
+
+  @@id([sex_worker_address_id, sex_worker_service_id], map: "PK_sex_worker_address_has_sex_worker_service")
+  @@index([sex_worker_address_id], map: "fk_sex_worker_address_has_sex_worker_service_sex_worker_add_idx")
+  @@index([sex_worker_service_id], map: "fk_sex_worker_address_has_sex_worker_service_sex_worker_ser_idx")
+}
+
+model sex_worker_contact {
+  id            Int        @id(map: "PK_sex_worker_contact") @default(autoincrement())
+  fone          String?    @db.VarChar(45)
+  email         String?    @db.VarChar(45)
+  city          String?    @db.VarChar(45)
+  sex_worker_id Int
+  sex_worker    sex_worker @relation(fields: [sex_worker_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_contact_sex_worker1")
+
+  @@index([sex_worker_id], map: "fk_sex_worker_contact_sex_worker1_idx")
+}
+
+model sex_worker_galery {
+  id            Int        @id(map: "PK_sex_worker_galery") @default(autoincrement())
+  photo         String?    @db.VarChar(200)
+  title         String?    @db.VarChar(45)
+  description   String?    @db.VarChar(45)
+  sex_worker_id Int
+  sex_worker    sex_worker @relation(fields: [sex_worker_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_galery_sex_worker1")
+
+  @@index([sex_worker_id], map: "fk_sex_worker_galery_sex_worker1_idx")
+}
+
+model sex_worker_service {
+  id                                        Int                                         @id(map: "PK_sex_worker_service") @default(autoincrement())
+  name                                      String?                                     @db.VarChar(45)
+  preco                                     Decimal?                                    @db.Decimal(10, 2)
+  sex_worker_id                             Int
+  sex_worker_address_has_sex_worker_service sex_worker_address_has_sex_worker_service[]
+  sex_worker                                sex_worker                                  @relation(fields: [sex_worker_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sex_worker_service_sex_worker1")
+
+  @@index([sex_worker_id], map: "fk_sex_worker_service_sex_worker1_idx")
+}
